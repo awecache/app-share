@@ -6,9 +6,15 @@ import { LoginData } from './models';
   providedIn: 'root',
 })
 export class AuthService {
+  loginData: LoginData;
+
   constructor(private http: HttpClient) {}
 
   login(loginData: LoginData) {
     return this.http.post('/login', loginData);
+  }
+
+  getLoginData(): LoginData {
+    return this.loginData;
   }
 }

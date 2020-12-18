@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -32,10 +31,12 @@ export class LoginComponent implements OnInit {
       username: this.form.get('username').value,
       password: this.form.get('password').value,
     };
+
     this.authService.login(loginData).subscribe(
-      (data) => {
-        console.log('success : ', data);
+      () => {
         this.router.navigate(['main']);
+        localStorage.setItem('username', loginData.username);
+        localStorage.setItem('password', loginData.password);
       },
       (err) => {
         console.log('error', err.error.errorMessage);

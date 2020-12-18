@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const express = require('express');
 
 const { startApp } = require('./utils');
-const { loginRoutes } = require('./routes');
+const { loginRoutes, s3Routes } = require('./routes');
 const { s3, mysqlPool, mongoClient } = require('./database');
 
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
@@ -15,6 +15,7 @@ const app = express();
 app.use(morgan('combined'));
 
 app.use(loginRoutes);
+app.use(s3Routes);
 
 const mysqlConnection = (async () => {
   const conn = await mysqlPool.getConnection();
