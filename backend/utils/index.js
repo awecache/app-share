@@ -17,6 +17,7 @@ const makeQuery = (sql, pool) => {
   };
 };
 
+// check connections and start server
 const startApp = async (app, ...promises) => {
   const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 
@@ -74,41 +75,6 @@ async function downloadFromS3(params, s3, res) {
     res.status(200).type(imageType(fileData).mime).send(fileData);
   });
 }
-
-//mongo helper
-const aggregateFunc = async (gameId, collection) =>
-  await collection
-    .aggregate([
-      {
-        $match: {
-          ID: gameId
-        }
-      },
-      {
-        $limit: 30
-      },
-      {
-        $group: {
-          _id: '$ID',
-          reviews: {
-            $push: '$_id'
-          },
-          ratings: {
-            $push: '$rating'
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          reviews: 1,
-          avg_ratings: {
-            $avg: '$ratings'
-          }
-        }
-      }
-    ])
-    .toArray();
 
 module.exports = {
   makeQuery,

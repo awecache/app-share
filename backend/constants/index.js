@@ -1,6 +1,6 @@
 const MONGO_URL = 'mongodb://localhost:27017';
 const MONGO_DB = 'mydb';
-const MONGO_COLLECTION = 'my_collection';
+const MONGO_COLLECTION = 'posts';
 const S3_BASE_URL = 'digitaloceanspaces.com';
 
 module.exports = {

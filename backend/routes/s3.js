@@ -4,9 +4,10 @@ const express = require('express');
 const router = express.Router();
 
 const multer = require('multer');
-const { s3, mongoClient } = require('../database');
-const { putObject, readFile } = require('../utils');
+const { s3, mongoClient, mysqlPool } = require('../database');
+const { makeQuery, putObject, readFile } = require('../utils');
 const { MONGO_COLLECTION, MONGO_DB } = require('../constants');
+const { getPasswordByUserId } = require('../queries');
 
 const { AWS_S3_BUCKETNAME } = process.env;
 
@@ -15,42 +16,63 @@ const upload = multer({
   dest: destPath
 });
 
+const getPassword = makeQuery(getPasswordByUserId, mysqlPool);
+
 router.post('/upload', upload.single('image-file'), async (req, res) => {
-  console.log('body>>', req.body);
-  console.log('Key>>', req.file.filename);
+  const { username, password } = req.body;
 
-  // res.status(200).json({});
-  res.status(401).json({ error: true });
+  const saveDocToMongo = async () => {
+    const filename = req.file.filename;
+    const body = req.body;
+    const doc = {
+      ...body,
+      filename,
+      ts: new Date()
+    };
 
-  // const filename = req.file.filename;
-  // const body = req.body;
-  // const doc = {
-  //   ...body,
-  //   filename,
-  //   ts: new Date()
-  // };
+    // //save to mongo Promise
+    const mongoResult = await mongoClient
+      .db(MONGO_DB)
+      .collection(MONGO_COLLECTION)
+      .insertOne(doc);
 
-  // //save to s3 Promise
-  // const buffer = await readFile(req.file.path);
-  // const s3Result = putObject(req.file, buffer, s3, AWS_S3_BUCKETNAME);
+    return mongoResult;
+  };
 
-  // //save to mongo Promise
-  // const mongoResult = mongoClient
-  //   .db(MONGO_DB)
-  //   .collection(MONGO_COLLECTION)
-  //   .insertOne(doc);
+  try {
+    const result = (await getPassword([username]))[0];
+    if (!result) {
+      return res.status(401).json({ errorMessage: 'Invalid Credentials' });
+    }
+    if (result.password && password.localeCompare(result.password) === 0) {
+      console.log('auth successful ');
 
-  // try {
-  //   const results = await Promise.all([mongoResult]);
-  //   const doc = results[0].ops[0];
-  //   res.status(200).json({ doc, insertedId: results[0].insertedId });
-  // } catch (error) {
-  //   res.status(404).type('json').json({ myerror: error });
-  // } finally {
-  //   fs.unlink(req.file.path, () => {
-  //     console.log('clean up after upload');
-  //   });
-  // }
+      //read buffer
+      const buffer = await readFile(req.file.path);
+
+      try {
+        //save image to S3
+        await putObject(req.file, buffer, s3, AWS_S3_BUCKETNAME);
+
+        //save doc to mongoDB
+        const { insertedId } = await saveDocToMongo();
+
+        console.log('insertedId>>>', insertedId);
+
+        fs.unlink(req.file.path, () => {
+          console.log('clean up after upload');
+        });
+
+        return res.status(200).json({ id: insertedId });
+      } catch (error) {
+        return res.status(500).json({ error });
+      } finally {
+        mongoClient.close();
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({ errorMessage: 'Try again' });
+  }
 });
 
 module.exports = router;

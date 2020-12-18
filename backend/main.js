@@ -9,8 +9,6 @@ const { s3, mysqlPool, mongoClient } = require('./database');
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 
 const app = express();
-// app.use(express.urlencoded({ limit: '50mb', extended: true }));
-// app.use(express.json({ limit: '50mb' }));
 
 app.use(morgan('combined'));
 

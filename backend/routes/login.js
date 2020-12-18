@@ -8,13 +8,10 @@ const router = express.Router();
 
 const getPassword = makeQuery(getPasswordByUserId, mysqlPool);
 
-//auth middleware
+//implement auth middleware to reduce repeated code
 
 router.post('/login', express.json(), async (req, res) => {
   const { username, password } = req.body;
-
-  // console.log('name', username);
-  // console.log('pass', password);
 
   try {
     const result = (await getPassword([username]))[0];
@@ -30,16 +27,5 @@ router.post('/login', express.json(), async (req, res) => {
 
   res.status(401).json({ errorMessage: 'Invalid Credentials' });
 });
-
-// router.get('/mysql/orders', async (req, res) => {
-//   try {
-//     const orders = await getOrders();
-//     console.log('orders', orders);
-//     res.status(200).json({ orders });
-//   } catch (error) {
-//     console.log('error', error);
-//     res.status(404).json({ error });
-//   }
-// });
 
 module.exports = router;
