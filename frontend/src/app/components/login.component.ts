@@ -34,9 +34,10 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(loginData).subscribe(
       () => {
+        this.authService.setLoginData(loginData);
         this.router.navigate(['main']);
-        localStorage.setItem('username', loginData.username);
-        localStorage.setItem('password', loginData.password);
+        // localStorage.setItem('username', loginData.username);
+        // localStorage.setItem('password', loginData.password);
       },
       (err) => {
         console.log('error', err.error.errorMessage);

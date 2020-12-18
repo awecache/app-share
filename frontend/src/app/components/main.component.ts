@@ -4,6 +4,7 @@ import { CameraService } from '../camera.service';
 import { LoginData } from '../models';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-main',
@@ -19,7 +20,8 @@ export class MainComponent implements OnInit {
     private cameraSvc: CameraService,
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -31,8 +33,11 @@ export class MainComponent implements OnInit {
       title: ['', [Validators.required]],
       comments: ['', [Validators.required]],
     });
-    const username = localStorage.getItem('username');
-    const password = localStorage.getItem('password');
+    // console.log('loginData>$$', this.authService.getLoginData());
+    const { username, password } = this.authService.getLoginData();
+
+    // const username = localStorage.getItem('username');
+    // const password = localStorage.getItem('password');
     this.loginData = { username, password };
   }
 
@@ -52,8 +57,8 @@ export class MainComponent implements OnInit {
           this.form.reset();
         },
         (error) => {
-          localStorage.removeItem('username');
-          localStorage.removeItem('password');
+          // localStorage.removeItem('username');
+          // localStorage.removeItem('password');
           this.clear();
           this.router.navigate(['/login']);
           console.log(error);
@@ -62,8 +67,8 @@ export class MainComponent implements OnInit {
     } catch (error) {
       console.log(error);
       this.clear();
-      localStorage.removeItem('username');
-      localStorage.removeItem('password');
+      // localStorage.removeItem('username');
+      // localStorage.removeItem('password');
     }
   }
 

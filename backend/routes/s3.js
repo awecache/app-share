@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const router = express.Router();
+const sha1 = require('sha1');
 
 const multer = require('multer');
 const { s3, mongoClient, mysqlPool } = require('../database');
@@ -20,6 +21,7 @@ const getPassword = makeQuery(getPasswordByUserId, mysqlPool);
 
 router.post('/upload', upload.single('image-file'), async (req, res) => {
   const { username, password } = req.body;
+  const hashedPassword = sha1(password);
 
   const saveDocToMongo = async () => {
     const filename = req.file.filename;
@@ -44,7 +46,10 @@ router.post('/upload', upload.single('image-file'), async (req, res) => {
     if (!result) {
       return res.status(401).json({ errorMessage: 'Invalid Credentials' });
     }
-    if (result.password && password.localeCompare(result.password) === 0) {
+    if (
+      result.password &&
+      hashedPassword.localeCompare(result.password) === 0
+    ) {
       console.log('auth successful ');
 
       //read buffer
@@ -57,10 +62,20 @@ router.post('/upload', upload.single('image-file'), async (req, res) => {
         //save doc to mongoDB
         const { insertedId } = await saveDocToMongo();
 
-        console.log('insertedId>>>', insertedId);
+        // fs.unlink(req.file.path, () => {
+        //   console.log('clean up after upload');
+        // });
 
-        fs.unlink(req.file.path, () => {
-          console.log('clean up after upload');
+        //delete all files found in uploads dir
+        const directory = path.join(req.file.path, '..');
+        fs.readdir(directory, (err, files) => {
+          if (err) throw err;
+
+          for (const file of files) {
+            fs.unlink(path.join(directory, file), (err) => {
+              if (err) throw err;
+            });
+          }
         });
 
         return res.status(200).json({ id: insertedId });

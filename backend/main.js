@@ -5,7 +5,7 @@ const express = require('express');
 
 const { startApp } = require('./utils');
 const { loginRoutes, s3Routes } = require('./routes');
-const { s3, mysqlPool, mongoClient } = require('./database');
+const { mysqlPool, mongoClient } = require('./database');
 
 const app = express();
 
