@@ -62,21 +62,21 @@ router.post('/upload', upload.single('image-file'), async (req, res) => {
         //save doc to mongoDB
         const { insertedId } = await saveDocToMongo();
 
-        // fs.unlink(req.file.path, () => {
-        //   console.log('clean up after upload');
-        // });
-
-        //delete all files found in uploads dir
-        const directory = path.join(req.file.path, '..');
-        fs.readdir(directory, (err, files) => {
-          if (err) throw err;
-
-          for (const file of files) {
-            fs.unlink(path.join(directory, file), (err) => {
-              if (err) throw err;
-            });
-          }
+        fs.unlink(req.file.path, () => {
+          console.log('clean up after upload');
         });
+
+        // //delete all files found in uploads dir
+        // const directory = path.join(req.file.path, '..');
+        // fs.readdir(directory, (err, files) => {
+        //   if (err) throw err;
+
+        //   for (const file of files) {
+        //     fs.unlink(path.join(directory, file), (err) => {
+        //       if (err) throw err;
+        //     });
+        //   }
+        // });
 
         return res.status(200).json({ id: insertedId });
       } catch (error) {
