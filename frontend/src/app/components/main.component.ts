@@ -14,7 +14,6 @@ import { AuthService } from '../auth.service';
 export class MainComponent implements OnInit {
   imagePath = '/assets/cactus.png';
   form: FormGroup;
-  loginData: LoginData;
 
   constructor(
     private cameraSvc: CameraService,
@@ -33,43 +32,33 @@ export class MainComponent implements OnInit {
       title: ['', [Validators.required]],
       comments: ['', [Validators.required]],
     });
-    // console.log('loginData>$$', this.authService.getLoginData());
-    const { username, password } = this.authService.getLoginData();
 
     // const username = localStorage.getItem('username');
     // const password = localStorage.getItem('password');
-    this.loginData = { username, password };
   }
 
   share() {
+    const { username, password } = this.authService.getLoginData();
     const formData = new FormData();
     formData.set('title', this.form.get('title').value);
     formData.set('comments', this.form.get('comments').value);
-    formData.set('username', this.loginData.username);
-    formData.set('password', this.loginData.password);
+    formData.set('username', username);
+    formData.set('password', password);
     formData.set('image-file', this.cameraSvc.getImage().imageData);
 
-    try {
-      this.http.post('/upload', formData).subscribe(
-        (data) => {
-          console.log('successful upload', data);
-          this.clear();
-          this.form.reset();
-        },
-        (error) => {
-          // localStorage.removeItem('username');
-          // localStorage.removeItem('password');
-          this.clear();
-          this.router.navigate(['/login']);
-          console.log(error);
-        }
-      );
-    } catch (error) {
-      console.log(error);
-      this.clear();
-      // localStorage.removeItem('username');
-      // localStorage.removeItem('password');
-    }
+    this.http.post('/upload', formData).subscribe(
+      (data) => {
+        console.log('successful upload', data);
+        this.clear();
+      },
+      (error) => {
+        // localStorage.removeItem('username');
+        // localStorage.removeItem('password');
+        this.clear();
+        this.router.navigate(['/login']);
+        console.log(error);
+      }
+    );
   }
 
   clear() {

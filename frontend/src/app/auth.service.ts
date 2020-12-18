@@ -6,7 +6,7 @@ import { LoginData } from './models';
   providedIn: 'root',
 })
 export class AuthService {
-  loginData: LoginData;
+  private loginData: LoginData;
 
   constructor(private http: HttpClient) {}
 
