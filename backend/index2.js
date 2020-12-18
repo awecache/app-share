@@ -1,21 +1,27 @@
 require('dotenv').config();
 const morgan = require('morgan');
 const express = require('express');
+const cors = require('cors');
 
 const { startApp } = require('./utils');
-const { loginRoutes } = require('./routes');
+const { s3Routes, mysqlRoutes } = require('./routes');
 const { s3, mysqlPool, mongoClient } = require('./database');
 
-const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
-
 const app = express();
-// app.use(express.urlencoded({ limit: '50mb', extended: true }));
-// app.use(express.json({ limit: '50mb' }));
+app.use(cors());
 
 app.use(morgan('combined'));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
 
-app.use(loginRoutes);
+app.use(s3Routes);
+// app.use(formRoutes);
+app.use(mysqlRoutes);
+app.get('/test', (req, res) => {
+  res.send({ test: 'test' });
+});
 
+//check db connections
 const mysqlConnection = (async () => {
   const conn = await mysqlPool.getConnection();
   await conn.ping();

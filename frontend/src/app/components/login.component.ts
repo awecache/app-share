@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { LoginData } from '../models';
 
@@ -13,7 +14,11 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   form: FormGroup;
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -29,10 +34,12 @@ export class LoginComponent implements OnInit {
     };
     this.authService.login(loginData).subscribe(
       (data) => {
-        console.log('success', data);
+        console.log('success : ', data);
+        this.router.navigate(['main']);
       },
-      (error) => {
-        console.log('error', error);
+      (err) => {
+        console.log('error', err.error.errorMessage);
+        this.errorMessage = err.error.errorMessage;
       }
     );
   }
