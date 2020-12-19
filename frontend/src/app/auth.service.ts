@@ -11,7 +11,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(loginData: LoginData) {
-    this.loginData = { ...loginData };
+    this.loginData = loginData;
 
     return this.http.post('/login', loginData);
   }

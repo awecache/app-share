@@ -56,7 +56,7 @@ export class MainComponent implements OnInit {
         // localStorage.removeItem('password');
         this.clear();
         this.router.navigate(['/login']);
-        console.log(error);
+        console.log('upload error: ', error);
       }
     );
   }

@@ -22,7 +22,10 @@ const ROUTES: Routes = [
   declarations: [AppComponent, LoginComponent, MainComponent, CaptureComponent],
   imports: [
     BrowserModule,
-    RouterModule.forRoot(ROUTES),
+    RouterModule.forRoot(ROUTES, {
+      // initialNavigation: 'enabledNonBlocking',
+      // useHash: true,
+    }),
     WebcamModule,
     FormsModule,
     ReactiveFormsModule,
